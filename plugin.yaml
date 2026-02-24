@@ -27,14 +27,7 @@ inputs:
     required: true
     accept: ".csv,.tsv,.txt"
     description: "Sample annotation file with Sample, Condition, and covariate columns"
-
-  - name: "sample_cols"
-    label: "Sample Columns"
-    type: "column-selector"
-    required: true
-    multiple: true
-    sourceFile: "input_file"
-    description: "Select columns containing sample data"
+    disableAnnotationManagement: true
 
   - name: "index_col"
     label: "Feature ID Column"
@@ -128,7 +121,6 @@ outputs:
     format: "html"
 
 annotation:
-  samplesFrom: "sample_cols"
   annotationFile: "annotation_file"
 
 plots:
@@ -148,9 +140,6 @@ execution:
   argsMapping:
     input_file: "--input_file"
     annotation_file: "--annotation_file"
-    sample_cols:
-      flag: "--sample_cols"
-      transform: "comma-join"
     index_col: "--index_col"
     factor_col: "--factor_col"
     covariate_cols:
@@ -177,15 +166,7 @@ example:
   enabled: true
   values:
     input_file: "diann/imputed.data.txt"
-    annotation_file: "differential_analysis/batch_info.txt"
-    sample_cols_source: "diann/imputed.data.txt"
-    sample_cols:
-      - 'C:\Raja\DIA-NN searches\June 2022\LT-CBQCA-Test_DIA\RN-DS_220106_BCA_LT-IP_01.raw'
-      - 'C:\Raja\DIA-NN searches\June 2022\LT-CBQCA-Test_DIA\RN-DS_220106_BCA_LT-IP_02.raw'
-      - 'C:\Raja\DIA-NN searches\June 2022\LT-CBQCA-Test_DIA\RN-DS_220106_BCA_LT-IP_03.raw'
-      - 'C:\Raja\DIA-NN searches\June 2022\LT-CBQCA-Test_DIA\RN-DS_220106_BCA_LT-MockIP_01.raw'
-      - 'C:\Raja\DIA-NN searches\June 2022\LT-CBQCA-Test_DIA\RN-DS_220106_BCA_LT-MockIP_02.raw'
-      - 'C:\Raja\DIA-NN searches\June 2022\LT-CBQCA-Test_DIA\RN-DS_220106_BCA_LT-MockIP_03.raw'
+    annotation_file: "diann/annotation.txt"
     factor_col: "Condition"
     covariate_cols:
       - "Batch"

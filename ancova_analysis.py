@@ -291,7 +291,6 @@ def ancova_batch(
     input_file: str,
     annotation_file: str,
     output_folder: str,
-    sample_cols: list[str],
     factor_col: str,
     covariate_cols: list[str],
     index_col: str = None,
@@ -305,7 +304,6 @@ def ancova_batch(
     :param input_file: Path to input data file (features as rows, samples as columns).
     :param annotation_file: Path to annotation file (Sample, Condition, covariates).
     :param output_folder: Path to output folder.
-    :param sample_cols: List of sample column names to analyze.
     :param factor_col: Name of the main factor column in annotation file.
     :param covariate_cols: List of covariate column names in annotation file.
     :param index_col: Name of index column for feature IDs.
@@ -331,7 +329,9 @@ def ancova_batch(
 
     sample_col_name = "Sample"
     if sample_col_name not in annotation_df.columns:
-        sample_col_name = annotation_df.columns[0]
+        raise ValueError("Annotation file must have 'Sample' column")
+
+    sample_cols = annotation_df[sample_col_name].tolist()
 
     if factor_col not in annotation_df.columns:
         raise ValueError(f"Factor column '{factor_col}' not found in annotation file")
@@ -486,7 +486,6 @@ def ancova_batch(
 @click.option("--input_file", "-i", required=True, help="Path to input data file")
 @click.option("--annotation_file", "-a", required=True, help="Path to annotation file (Sample, Condition, covariates)")
 @click.option("--output_folder", "-o", required=True, help="Path to output folder")
-@click.option("--sample_cols", "-s", required=True, help="Comma-separated sample column names")
 @click.option("--factor_col", "-f", required=True, help="Name of the main factor column in annotation")
 @click.option("--covariate_cols", "-c", required=True, help="Comma-separated covariate column names")
 @click.option("--index_col", "-x", default=None, help="Name of index column for feature IDs")
@@ -497,7 +496,6 @@ def main(
     input_file: str,
     annotation_file: str,
     output_folder: str,
-    sample_cols: str,
     factor_col: str,
     covariate_cols: str,
     index_col: str,
@@ -506,14 +504,12 @@ def main(
     log2: bool
 ):
     """Batch ANCOVA analysis with multiple covariates and FDR correction."""
-    sample_list = [s.strip() for s in sample_cols.split(",")]
     covariate_list = [c.strip() for c in covariate_cols.split(",") if c.strip()]
 
     ancova_batch(
         input_file=input_file,
         annotation_file=annotation_file,
         output_folder=output_folder,
-        sample_cols=sample_list,
         factor_col=factor_col,
         covariate_cols=covariate_list,
         index_col=index_col,
