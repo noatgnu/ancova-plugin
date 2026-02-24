@@ -304,6 +304,7 @@ def ancova_batch(
     factor_col: str,
     covariate_cols: list[str],
     index_col: str = None,
+    metadata_col: str = None,
     ss_type: int = 2,
     alpha: float = 0.05,
     log2_transform: bool = False
@@ -317,6 +318,7 @@ def ancova_batch(
     :param factor_col: Name of the main factor column in annotation file.
     :param covariate_cols: List of covariate column names in annotation file.
     :param index_col: Name of index column for feature IDs.
+    :param metadata_col: Optional column for display name (e.g., gene name).
     :param ss_type: Type of sum of squares (1, 2, or 3).
     :param alpha: Significance threshold for FDR.
     :param log2_transform: Whether to log2 transform the data.
@@ -351,7 +353,15 @@ def ancova_batch(
             raise ValueError(f"Covariate column '{cov}' not found in annotation file")
 
     if index_col and index_col in df.columns:
-        feature_names = df[index_col].tolist()
+        if metadata_col and metadata_col in df.columns:
+            feature_names = []
+            for idx, meta in zip(df[index_col], df[metadata_col]):
+                if pd.notna(meta) and str(meta).strip():
+                    feature_names.append(f"{idx} ({meta})")
+                else:
+                    feature_names.append(str(idx))
+        else:
+            feature_names = df[index_col].astype(str).tolist()
     else:
         feature_names = [f"Feature_{i}" for i in range(len(df))]
 
@@ -499,6 +509,7 @@ def ancova_batch(
 @click.option("--factor_col", "-f", required=True, help="Name of the main factor column in annotation")
 @click.option("--covariate_cols", "-c", required=True, help="Comma-separated covariate column names")
 @click.option("--index_col", "-x", default=None, help="Name of index column for feature IDs")
+@click.option("--metadata_col", "-m", default=None, help="Optional column for display name (e.g., gene name)")
 @click.option("--ss_type", "-t", type=int, default=2, help="Type of sum of squares (1, 2, or 3)")
 @click.option("--alpha", type=float, default=0.05, help="FDR significance threshold")
 @click.option("--log2", "-l", is_flag=True, help="Log2 transform the data")
@@ -509,6 +520,7 @@ def main(
     factor_col: str,
     covariate_cols: str,
     index_col: str,
+    metadata_col: str,
     ss_type: int,
     alpha: float,
     log2: bool
@@ -523,6 +535,7 @@ def main(
         factor_col=factor_col,
         covariate_cols=covariate_list,
         index_col=index_col,
+        metadata_col=metadata_col,
         ss_type=ss_type,
         alpha=alpha,
         log2_transform=log2

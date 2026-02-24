@@ -37,6 +37,14 @@ inputs:
     sourceFile: "input_file"
     description: "Column containing feature identifiers (e.g., protein IDs)"
 
+  - name: "metadata_col"
+    label: "Metadata Column"
+    type: "column-selector"
+    required: false
+    multiple: false
+    sourceFile: "input_file"
+    description: "Optional column for display name (e.g., gene name). Features will be shown as 'ID (Name)'"
+
   - name: "factor_col"
     label: "Main Factor Column"
     type: "column-selector"
@@ -141,6 +149,7 @@ execution:
     input_file: "--input_file"
     annotation_file: "--annotation_file"
     index_col: "--index_col"
+    metadata_col: "--metadata_col"
     factor_col: "--factor_col"
     covariate_cols:
       flag: "--covariate_cols"
@@ -168,6 +177,7 @@ example:
     input_file: "diann/imputed.data.txt"
     annotation_file: "diann/annotation.txt"
     index_col: "Protein.Ids"
+    metadata_col: "Genes"
     factor_col: "Condition"
     covariate_cols:
       - "Batch"
