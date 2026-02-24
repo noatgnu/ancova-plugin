@@ -1,0 +1,200 @@
+---
+plugin:
+  id: "ancova-analysis"
+  name: "ANCOVA Analysis"
+  description: "Analysis of Covariance (ANCOVA) for comparing group means while controlling for covariates, with FDR correction"
+  version: "1.0.0"
+  author: "CauldronGO Team"
+  category: "analysis"
+  icon: "analytics"
+  repository: "https://github.com/noatgnu/ancova-plugin"
+
+runtime:
+  environments: ["python"]
+  entrypoint: "ancova_analysis.py"
+
+inputs:
+  - name: "input_file"
+    label: "Input Data File"
+    type: "file"
+    required: true
+    accept: ".csv,.tsv,.txt"
+    description: "Data matrix with features as rows and samples as columns"
+
+  - name: "annotation_file"
+    label: "Annotation File"
+    type: "file"
+    required: true
+    accept: ".csv,.tsv,.txt"
+    description: "Sample annotation file with Sample, Condition, and covariate columns"
+
+  - name: "sample_cols"
+    label: "Sample Columns"
+    type: "column-selector"
+    required: true
+    multiple: true
+    sourceFile: "input_file"
+    description: "Select columns containing sample data"
+
+  - name: "index_col"
+    label: "Feature ID Column"
+    type: "column-selector"
+    required: false
+    multiple: false
+    sourceFile: "input_file"
+    description: "Column containing feature identifiers (e.g., protein IDs)"
+
+  - name: "factor_col"
+    label: "Main Factor Column"
+    type: "column-selector"
+    required: true
+    multiple: false
+    sourceFile: "annotation_file"
+    description: "Column in annotation file containing the main grouping factor (e.g., Condition)"
+
+  - name: "covariate_cols"
+    label: "Covariate Columns"
+    type: "column-selector"
+    required: true
+    multiple: true
+    sourceFile: "annotation_file"
+    description: "Columns in annotation file containing covariates to control for (e.g., Batch, Age)"
+
+  - name: "ss_type"
+    label: "Sum of Squares Type"
+    type: "select"
+    required: false
+    default: "2"
+    options:
+      - value: "1"
+        label: "Type I (Sequential)"
+      - value: "2"
+        label: "Type II (Hierarchical)"
+      - value: "3"
+        label: "Type III (Marginal)"
+    description: "Type of sum of squares for ANCOVA"
+
+  - name: "alpha"
+    label: "FDR Threshold"
+    type: "number"
+    required: false
+    default: 0.05
+    min: 0.001
+    max: 0.5
+    step: 0.01
+    description: "False Discovery Rate threshold (Benjamini-Hochberg)"
+
+  - name: "log2"
+    label: "Log2 Transform"
+    type: "boolean"
+    default: false
+    description: "Apply log2 transformation to data before analysis"
+
+outputs:
+  - name: "ancova_results"
+    path: "ancova_results.txt"
+    type: "data"
+    description: "ANCOVA results with F-statistics, p-values, adjusted p-values, and effect sizes"
+    format: "tsv"
+
+  - name: "adjusted_means"
+    path: "adjusted_means.txt"
+    type: "data"
+    description: "Covariate-adjusted means for significant features"
+    format: "tsv"
+
+  - name: "analysis_summary"
+    path: "analysis_summary.txt"
+    type: "data"
+    description: "Summary of analysis parameters and results"
+    format: "tsv"
+
+  - name: "volcano_plot"
+    path: "volcano_plot.html"
+    type: "html"
+    description: "Volcano plot showing effect size vs significance"
+    format: "html"
+
+  - name: "effect_size_plot"
+    path: "effect_size_plot.html"
+    type: "html"
+    description: "Bar plot of top features by effect size"
+    format: "html"
+
+  - name: "pvalue_histogram"
+    path: "pvalue_histogram.html"
+    type: "html"
+    description: "Distribution of raw and adjusted p-values"
+    format: "html"
+
+annotation:
+  samplesFrom: "sample_cols"
+  annotationFile: "annotation_file"
+
+plots:
+  - id: "ancova-volcano"
+    name: "Volcano Plot"
+    type: "scatter"
+    dataSource: "ancova_results"
+    default: true
+    config:
+      axes:
+        x: "factor_eta_sq"
+        y: "adj_p"
+        colorBy: "significant"
+        labels: "feature"
+
+execution:
+  argsMapping:
+    input_file: "--input_file"
+    annotation_file: "--annotation_file"
+    sample_cols:
+      flag: "--sample_cols"
+      transform: "comma-join"
+    index_col: "--index_col"
+    factor_col: "--factor_col"
+    covariate_cols:
+      flag: "--covariate_cols"
+      transform: "comma-join"
+    ss_type: "--ss_type"
+    alpha: "--alpha"
+    log2:
+      flag: "--log2"
+      when: "true"
+
+  outputDir: "--output_folder"
+
+  requirements:
+    python: ">=3.11"
+    packages:
+      - "numpy>=1.24.0"
+      - "pandas>=2.0.0"
+      - "statsmodels>=0.14.0"
+      - "plotly>=5.18.0"
+      - "click>=8.0.0"
+
+example:
+  enabled: true
+  values:
+    input_file: "diann/imputed.data.txt"
+    annotation_file: "differential_analysis/batch_info.txt"
+    sample_cols_source: "diann/imputed.data.txt"
+    sample_cols:
+      - 'C:\Raja\DIA-NN searches\June 2022\LT-CBQCA-Test_DIA\RN-DS_220106_BCA_LT-IP_01.raw'
+      - 'C:\Raja\DIA-NN searches\June 2022\LT-CBQCA-Test_DIA\RN-DS_220106_BCA_LT-IP_02.raw'
+      - 'C:\Raja\DIA-NN searches\June 2022\LT-CBQCA-Test_DIA\RN-DS_220106_BCA_LT-IP_03.raw'
+      - 'C:\Raja\DIA-NN searches\June 2022\LT-CBQCA-Test_DIA\RN-DS_220106_BCA_LT-MockIP_01.raw'
+      - 'C:\Raja\DIA-NN searches\June 2022\LT-CBQCA-Test_DIA\RN-DS_220106_BCA_LT-MockIP_02.raw'
+      - 'C:\Raja\DIA-NN searches\June 2022\LT-CBQCA-Test_DIA\RN-DS_220106_BCA_LT-MockIP_03.raw'
+    factor_col: "Condition"
+    covariate_cols:
+      - "Batch"
+    ss_type: "2"
+    alpha: 0.05
+    log2: true
+
+diagram:
+  enabled: true
+
+citation:
+  enabled: true
