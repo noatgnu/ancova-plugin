@@ -86,12 +86,20 @@ def run_ancova_single(
         factor_ss = anova_table.loc[factor_key, "sum_sq"] if factor_key in anova_table.index else 0
         factor_eta_sq = factor_ss / ss_total if ss_total > 0 else np.nan
 
+        group_means = data_clean.groupby(factor)[dependent_var].mean()
+        groups = sorted(group_means.index.tolist())
+        if len(groups) == 2:
+            log2fc = group_means[groups[1]] - group_means[groups[0]]
+        else:
+            log2fc = group_means.max() - group_means.min()
+
         return {
             "feature": dependent_var,
             "n": len(data_clean),
             "factor_f": factor_f,
             "factor_p": factor_p,
             "factor_eta_sq": factor_eta_sq,
+            "log2fc": log2fc,
             "residual_std": np.sqrt(model.mse_resid),
             "r_squared": model.rsquared,
             "error": None
@@ -104,6 +112,7 @@ def run_ancova_single(
             "factor_f": np.nan,
             "factor_p": np.nan,
             "factor_eta_sq": np.nan,
+            "log2fc": np.nan,
             "residual_std": np.nan,
             "r_squared": np.nan,
             "error": str(e)
@@ -181,7 +190,7 @@ def generate_volcano_plot(results_df: pd.DataFrame, output_folder: str):
     :param results_df: DataFrame with ANCOVA results.
     :param output_folder: Output folder path.
     """
-    plot_df = results_df.dropna(subset=["factor_p", "factor_eta_sq"])
+    plot_df = results_df.dropna(subset=["factor_p", "log2fc"])
     if len(plot_df) == 0:
         return
 
@@ -192,14 +201,14 @@ def generate_volcano_plot(results_df: pd.DataFrame, output_folder: str):
 
     fig = px.scatter(
         plot_df,
-        x="factor_eta_sq",
+        x="log2fc",
         y="-log10(adj_p)",
         color="significant",
         hover_name="feature",
-        hover_data=["factor_f", "factor_p", "adj_p", "n"],
+        hover_data=["factor_f", "factor_p", "adj_p", "factor_eta_sq", "n"],
         title="ANCOVA Volcano Plot",
         labels={
-            "factor_eta_sq": "Effect Size (Eta-squared)",
+            "log2fc": "Log2 Fold Change",
             "-log10(adj_p)": "-log10(Adjusted P-value)"
         },
         color_discrete_map={True: "red", False: "gray"}
@@ -207,6 +216,7 @@ def generate_volcano_plot(results_df: pd.DataFrame, output_folder: str):
 
     fig.add_hline(y=-np.log10(0.05), line_dash="dash", line_color="blue",
                   annotation_text="FDR = 0.05")
+    fig.add_vline(x=0, line_dash="dash", line_color="gray", opacity=0.5)
 
     fig.update_layout(template="plotly_white", width=900, height=600)
     fig.write_html(os.path.join(output_folder, "volcano_plot.html"))
@@ -424,7 +434,7 @@ def ancova_batch(
 
     results_df = results_df[[
         "feature", "n", "factor_f", "factor_p", "adj_p",
-        "factor_eta_sq", "r_squared", "residual_std", "significant", "error"
+        "log2fc", "factor_eta_sq", "r_squared", "residual_std", "significant", "error"
     ]]
 
     results_df.to_csv(os.path.join(output_folder, "ancova_results.txt"), sep="\t", index=False)

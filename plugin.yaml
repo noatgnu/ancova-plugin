@@ -19,7 +19,7 @@ inputs:
     type: "file"
     required: true
     accept: ".csv,.tsv,.txt"
-    description: "Data matrix with features as rows and samples as columns"
+    description: "Data matrix with features as rows and samples as columns. Data should be log2 transformed or enable Log2 Transform option."
 
   - name: "annotation_file"
     label: "Annotation File"
@@ -81,7 +81,7 @@ inputs:
     label: "Log2 Transform"
     type: "boolean"
     default: false
-    description: "Apply log2 transformation to data before analysis"
+    description: "Apply log2 transformation to data before analysis. Enable if input data is not already log2 transformed."
 
 outputs:
   - name: "ancova_results"
@@ -131,7 +131,7 @@ plots:
     default: true
     config:
       axes:
-        x: "factor_eta_sq"
+        x: "log2fc"
         y: "adj_p"
         colorBy: "significant"
         labels: "feature"
