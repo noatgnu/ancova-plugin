@@ -167,6 +167,7 @@ example:
   values:
     input_file: "diann/imputed.data.txt"
     annotation_file: "diann/annotation.txt"
+    index_col: "Protein.Ids"
     factor_col: "Condition"
     covariate_cols:
       - "Batch"
