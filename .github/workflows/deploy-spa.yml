@@ -16,7 +16,7 @@ concurrency:
 
 env:
   CAULDRON_VERSION: "master"
-  PYODIDE_VERSION: "0.29.3"
+  PYODIDE_VERSION: "0.27.5"
 
 jobs:
   build-spa:
@@ -42,6 +42,12 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Build shared-lib
+        working-directory: cauldron-go/shared-lib
+        run: |
+          npm install
+          npm run build
+
       - name: Build plugin-to-spa
         working-directory: cauldron-go
         run: go build -o ../plugin-to-spa ./cmd/plugin-to-spa/
@@ -54,6 +60,8 @@ jobs:
             --skip-check \
             --no-build \
             --pyodide-version ${{ env.PYODIDE_VERSION }} \
+            --spa-template ./cauldron-go/spa-template \
+            --shared-lib-path /home/runner/work/${{ github.event.repository.name }}/${{ github.event.repository.name }}/cauldron-go/shared-lib/dist/cauldron-forms \
             --examples-dir ./examples:./cauldron-go/examples
 
       - name: Install SPA dependencies
