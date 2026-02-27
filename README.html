@@ -178,16 +178,16 @@
 <td>Always visible</td>
 </tr>
 <tr>
-<td><code>sample_cols</code></td>
-<td>Sample Columns</td>
-<td>column-selector (multiple)</td>
-<td>Yes</td>
+<td><code>index_col</code></td>
+<td>Feature ID Column</td>
+<td>column-selector (single)</td>
+<td>No</td>
 <td>-</td>
 <td>Always visible</td>
 </tr>
 <tr>
-<td><code>index_col</code></td>
-<td>Feature ID Column</td>
+<td><code>metadata_col</code></td>
+<td>Metadata Column</td>
 <td>column-selector (single)</td>
 <td>No</td>
 <td>-</td>
@@ -237,16 +237,16 @@
 </table>
 <h3 id="input-details">Input Details</h3>
 <h4 id="input-data-file-input-file">Input Data File (<code>input_file</code>)</h4>
-<p>Data matrix with features as rows and samples as columns</p>
+<p>Data matrix with features as rows and samples as columns. Data should be log2 transformed or enable Log2 Transform option.</p>
 <h4 id="annotation-file-annotation-file">Annotation File (<code>annotation_file</code>)</h4>
 <p>Sample annotation file with Sample, Condition, and covariate columns</p>
-<h4 id="sample-columns-sample-cols">Sample Columns (<code>sample_cols</code>)</h4>
-<p>Select columns containing sample data</p>
+<h4 id="feature-id-column-index-col">Feature ID Column (<code>index_col</code>)</h4>
+<p>Column containing feature identifiers (e.g., protein IDs)</p>
 <ul>
 <li><strong>Column Source</strong>: <code>input_file</code></li>
 </ul>
-<h4 id="feature-id-column-index-col">Feature ID Column (<code>index_col</code>)</h4>
-<p>Column containing feature identifiers (e.g., protein IDs)</p>
+<h4 id="metadata-column-metadata-col">Metadata Column (<code>metadata_col</code>)</h4>
+<p>Optional column for display name (e.g., gene name). Features will be shown as 'ID (Name)'</p>
 <ul>
 <li><strong>Column Source</strong>: <code>input_file</code></li>
 </ul>
@@ -268,7 +268,7 @@
 <h4 id="fdr-threshold-alpha">FDR Threshold (<code>alpha</code>)</h4>
 <p>False Discovery Rate threshold (Benjamini-Hochberg)</p>
 <h4 id="log2-transform-log2">Log2 Transform (<code>log2</code>)</h4>
-<p>Apply log2 transformation to data before analysis</p>
+<p>Apply log2 transformation to data before analysis. Enable if input data is not already log2 transformed.</p>
 <h2 id="outputs">Outputs</h2>
 <table>
 <thead>
@@ -328,7 +328,6 @@
 <h2 id="sample-annotation">Sample Annotation</h2>
 <p>This plugin supports sample annotation:</p>
 <ul>
-<li><strong>Samples From</strong>: <code>sample_cols</code></li>
 <li><strong>Annotation File</strong>: <code>annotation_file</code></li>
 </ul>
 <h2 id="visualizations">Visualizations</h2>
@@ -357,15 +356,15 @@
 </blockquote>
 <h2 id="example-data">Example Data</h2>
 <p>This plugin includes example data for testing:</p>
-<pre><code class="language-yaml">  sample_cols: [C:\Raja\DIA-NN searches\June 2022\LT-CBQCA-Test_DIA\RN-DS_220106_BCA_LT-IP_01.raw C:\Raja\DIA-NN searches\June 2022\LT-CBQCA-Test_DIA\RN-DS_220106_BCA_LT-IP_02.raw C:\Raja\DIA-NN searches\June 2022\LT-CBQCA-Test_DIA\RN-DS_220106_BCA_LT-IP_03.raw C:\Raja\DIA-NN searches\June 2022\LT-CBQCA-Test_DIA\RN-DS_220106_BCA_LT-MockIP_01.raw C:\Raja\DIA-NN searches\June 2022\LT-CBQCA-Test_DIA\RN-DS_220106_BCA_LT-MockIP_02.raw C:\Raja\DIA-NN searches\June 2022\LT-CBQCA-Test_DIA\RN-DS_220106_BCA_LT-MockIP_03.raw]
+<pre><code class="language-yaml">  ss_type: 2
+  log2: true
+  input_file: diann/imputed.data.txt
   factor_col: Condition
   covariate_cols: [Batch]
   alpha: 0.05
-  log2: true
-  input_file: diann/imputed.data.txt
-  sample_cols_source: diann/imputed.data.txt
-  ss_type: 2
-  annotation_file: differential_analysis/batch_info.txt
+  annotation_file: diann/annotation.txt
+  index_col: Protein.Ids
+  metadata_col: Genes
 </code></pre>
 <p>Load example data by clicking the <strong>Load Example</strong> button in the UI.</p>
 <h2 id="usage">Usage</h2>

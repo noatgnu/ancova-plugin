@@ -51,8 +51,8 @@ flowchart TD
 |------|-------|------|----------|---------|------------|
 | `input_file` | Input Data File | file | Yes | - | Always visible |
 | `annotation_file` | Annotation File | file | Yes | - | Always visible |
-| `sample_cols` | Sample Columns | column-selector (multiple) | Yes | - | Always visible |
 | `index_col` | Feature ID Column | column-selector (single) | No | - | Always visible |
+| `metadata_col` | Metadata Column | column-selector (single) | No | - | Always visible |
 | `factor_col` | Main Factor Column | column-selector (single) | Yes | - | Always visible |
 | `covariate_cols` | Covariate Columns | column-selector (multiple) | Yes | - | Always visible |
 | `ss_type` | Sum of Squares Type | select (Type I (Sequential), Type II (Hierarchical), Type III (Marginal)) | No | 2 | Always visible |
@@ -63,7 +63,7 @@ flowchart TD
 
 #### Input Data File (`input_file`)
 
-Data matrix with features as rows and samples as columns
+Data matrix with features as rows and samples as columns. Data should be log2 transformed or enable Log2 Transform option.
 
 
 #### Annotation File (`annotation_file`)
@@ -71,15 +71,15 @@ Data matrix with features as rows and samples as columns
 Sample annotation file with Sample, Condition, and covariate columns
 
 
-#### Sample Columns (`sample_cols`)
-
-Select columns containing sample data
-
-- **Column Source**: `input_file`
-
 #### Feature ID Column (`index_col`)
 
 Column containing feature identifiers (e.g., protein IDs)
+
+- **Column Source**: `input_file`
+
+#### Metadata Column (`metadata_col`)
+
+Optional column for display name (e.g., gene name). Features will be shown as 'ID (Name)'
 
 - **Column Source**: `input_file`
 
@@ -108,7 +108,7 @@ False Discovery Rate threshold (Benjamini-Hochberg)
 
 #### Log2 Transform (`log2`)
 
-Apply log2 transformation to data before analysis
+Apply log2 transformation to data before analysis. Enable if input data is not already log2 transformed.
 
 
 ## Outputs
@@ -126,7 +126,6 @@ Apply log2 transformation to data before analysis
 
 This plugin supports sample annotation:
 
-- **Samples From**: `sample_cols`
 - **Annotation File**: `annotation_file`
 
 ## Visualizations
@@ -160,15 +159,15 @@ Packages are defined inline in the plugin configuration:
 This plugin includes example data for testing:
 
 ```yaml
-  annotation_file: differential_analysis/batch_info.txt
-  sample_cols: [C:\Raja\DIA-NN searches\June 2022\LT-CBQCA-Test_DIA\RN-DS_220106_BCA_LT-IP_01.raw C:\Raja\DIA-NN searches\June 2022\LT-CBQCA-Test_DIA\RN-DS_220106_BCA_LT-IP_02.raw C:\Raja\DIA-NN searches\June 2022\LT-CBQCA-Test_DIA\RN-DS_220106_BCA_LT-IP_03.raw C:\Raja\DIA-NN searches\June 2022\LT-CBQCA-Test_DIA\RN-DS_220106_BCA_LT-MockIP_01.raw C:\Raja\DIA-NN searches\June 2022\LT-CBQCA-Test_DIA\RN-DS_220106_BCA_LT-MockIP_02.raw C:\Raja\DIA-NN searches\June 2022\LT-CBQCA-Test_DIA\RN-DS_220106_BCA_LT-MockIP_03.raw]
+  annotation_file: diann/annotation.txt
+  index_col: Protein.Ids
+  metadata_col: Genes
+  ss_type: 2
+  log2: true
+  input_file: diann/imputed.data.txt
   factor_col: Condition
   covariate_cols: [Batch]
   alpha: 0.05
-  log2: true
-  input_file: diann/imputed.data.txt
-  sample_cols_source: diann/imputed.data.txt
-  ss_type: 2
 ```
 
 Load example data by clicking the **Load Example** button in the UI.
