@@ -121,6 +121,8 @@ Apply log2 transformation to data before analysis. Enable if input data is not a
 | `volcano_plot` | `volcano_plot.html` | html | html | Volcano plot showing effect size vs significance |
 | `effect_size_plot` | `effect_size_plot.html` | html | html | Bar plot of top features by effect size |
 | `pvalue_histogram` | `pvalue_histogram.html` | html | html | Distribution of raw and adjusted p-values |
+| `boxplots` | `boxplots.html` | html | html | Box plots showing group distributions for top significant features |
+| `violin_plots` | `violin_plots.html` | html | html | Violin plots showing group distributions for top significant features |
 
 ## Sample Annotation
 
@@ -159,15 +161,15 @@ Packages are defined inline in the plugin configuration:
 This plugin includes example data for testing:
 
 ```yaml
+  input_file: diann/imputed.data.txt
+  metadata_col: Genes
+  covariate_cols: [Batch]
+  ss_type: 2
+  alpha: 0.05
   annotation_file: diann/annotation.txt
   index_col: Protein.Ids
-  metadata_col: Genes
-  ss_type: 2
-  log2: true
-  input_file: diann/imputed.data.txt
   factor_col: Condition
-  covariate_cols: [Batch]
-  alpha: 0.05
+  log2: true
 ```
 
 Load example data by clicking the **Load Example** button in the UI.

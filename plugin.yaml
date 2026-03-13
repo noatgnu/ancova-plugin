@@ -128,6 +128,18 @@ outputs:
     description: "Distribution of raw and adjusted p-values"
     format: "html"
 
+  - name: "boxplots"
+    path: "boxplots.html"
+    type: "html"
+    description: "Box plots showing group distributions for top significant features"
+    format: "html"
+
+  - name: "violin_plots"
+    path: "violin_plots.html"
+    type: "html"
+    description: "Violin plots showing group distributions for top significant features"
+    format: "html"
+
 annotation:
   annotationFile: "annotation_file"
 

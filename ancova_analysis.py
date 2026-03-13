@@ -297,6 +297,146 @@ def generate_pvalue_histogram(results_df: pd.DataFrame, output_folder: str):
     fig.write_html(os.path.join(output_folder, "pvalue_histogram.html"))
 
 
+def generate_boxplots(
+    data_long: pd.DataFrame,
+    results_df: pd.DataFrame,
+    factor_col: str,
+    output_folder: str,
+    top_n: int = 12
+):
+    """
+    Generate box plots for top significant features.
+
+    :param data_long: Long-format DataFrame with feature, Sample, value columns.
+    :param results_df: DataFrame with ANCOVA results.
+    :param factor_col: Name of the factor column.
+    :param output_folder: Output folder path.
+    :param top_n: Number of top features to show.
+    """
+    sig_results = results_df[results_df["significant"] == True].nsmallest(top_n, "adj_p")
+
+    if len(sig_results) == 0:
+        return
+
+    n_plots = len(sig_results)
+    n_cols = min(3, n_plots)
+    n_rows = (n_plots + n_cols - 1) // n_cols
+
+    fig = make_subplots(
+        rows=n_rows, cols=n_cols,
+        subplot_titles=[str(f)[:35] for f in sig_results["feature"].tolist()]
+    )
+
+    colors = px.colors.qualitative.Set2
+
+    for idx, (_, row) in enumerate(sig_results.iterrows()):
+        feature = row["feature"]
+        r_idx = idx // n_cols + 1
+        c_idx = idx % n_cols + 1
+
+        feature_data = data_long[data_long["feature"] == feature]
+
+        if len(feature_data) == 0:
+            continue
+
+        groups = sorted(feature_data[factor_col].unique())
+
+        for g_idx, group in enumerate(groups):
+            group_data = feature_data[feature_data[factor_col] == group]["value"]
+
+            fig.add_trace(
+                go.Box(
+                    y=group_data,
+                    name=str(group),
+                    marker_color=colors[g_idx % len(colors)],
+                    showlegend=(idx == 0),
+                    legendgroup=str(group)
+                ),
+                row=r_idx, col=c_idx
+            )
+
+    fig.update_layout(
+        title=f"Top {len(sig_results)} Significant Features by Group",
+        template="plotly_white",
+        height=350 * n_rows,
+        width=400 * n_cols,
+        boxmode="group"
+    )
+
+    fig.write_html(os.path.join(output_folder, "boxplots.html"))
+
+
+def generate_violin_plots(
+    data_long: pd.DataFrame,
+    results_df: pd.DataFrame,
+    factor_col: str,
+    output_folder: str,
+    top_n: int = 9
+):
+    """
+    Generate violin plots for top significant features.
+
+    :param data_long: Long-format DataFrame with feature, Sample, value columns.
+    :param results_df: DataFrame with ANCOVA results.
+    :param factor_col: Name of the factor column.
+    :param output_folder: Output folder path.
+    :param top_n: Number of top features to show.
+    """
+    sig_results = results_df[results_df["significant"] == True].nsmallest(top_n, "adj_p")
+
+    if len(sig_results) == 0:
+        return
+
+    n_plots = len(sig_results)
+    n_cols = min(3, n_plots)
+    n_rows = (n_plots + n_cols - 1) // n_cols
+
+    fig = make_subplots(
+        rows=n_rows, cols=n_cols,
+        subplot_titles=[str(f)[:35] for f in sig_results["feature"].tolist()]
+    )
+
+    colors = px.colors.qualitative.Set2
+
+    for idx, (_, row) in enumerate(sig_results.iterrows()):
+        feature = row["feature"]
+        r_idx = idx // n_cols + 1
+        c_idx = idx % n_cols + 1
+
+        feature_data = data_long[data_long["feature"] == feature]
+
+        if len(feature_data) == 0:
+            continue
+
+        groups = sorted(feature_data[factor_col].unique())
+
+        for g_idx, group in enumerate(groups):
+            group_data = feature_data[feature_data[factor_col] == group]["value"]
+
+            fig.add_trace(
+                go.Violin(
+                    y=group_data,
+                    name=str(group),
+                    marker_color=colors[g_idx % len(colors)],
+                    showlegend=(idx == 0),
+                    legendgroup=str(group),
+                    box_visible=True,
+                    meanline_visible=True
+                ),
+                row=r_idx, col=c_idx
+            )
+
+    fig.update_layout(
+        title=f"Top {len(sig_results)} Significant Features (Violin)",
+        template="plotly_white",
+        height=350 * n_rows,
+        width=400 * n_cols,
+        violinmode="group"
+    )
+
+    fig.write_html(os.path.join(output_folder, "violin_plots.html"))
+
+
 def ancova_batch(
     input_file: str,
     annotation_file: str,
@@ -457,6 +597,14 @@ def ancova_batch(
     generate_volcano_plot(results_df, output_folder)
     generate_effect_size_plot(results_df, output_folder)
     generate_pvalue_histogram(results_df, output_folder)
+
+    data_long_with_factor = data_long.merge(
+        annotation_subset[[sample_col_name, factor_col]],
+        on=sample_col_name,
+        how="inner"
+    )
+    generate_boxplots(data_long_with_factor, results_df, factor_col, output_folder)
+    generate_violin_plots(data_long_with_factor, results_df, factor_col, output_folder)
 
     print("[4/4] Computing adjusted means for significant features...")
 

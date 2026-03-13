@@ -323,6 +323,20 @@
 <td>html</td>
 <td>Distribution of raw and adjusted p-values</td>
 </tr>
+<tr>
+<td><code>boxplots</code></td>
+<td><code>boxplots.html</code></td>
+<td>html</td>
+<td>html</td>
+<td>Box plots showing group distributions for top significant features</td>
+</tr>
+<tr>
+<td><code>violin_plots</code></td>
+<td><code>violin_plots.html</code></td>
+<td>html</td>
+<td>html</td>
+<td>Violin plots showing group distributions for top significant features</td>
+</tr>
 </tbody>
 </table>
 <h2 id="sample-annotation">Sample Annotation</h2>
@@ -356,15 +370,15 @@
 </blockquote>
 <h2 id="example-data">Example Data</h2>
 <p>This plugin includes example data for testing:</p>
-<pre><code class="language-yaml">  ss_type: 2
-  log2: true
-  input_file: diann/imputed.data.txt
-  factor_col: Condition
+<pre><code class="language-yaml">  input_file: diann/imputed.data.txt
+  metadata_col: Genes
   covariate_cols: [Batch]
+  ss_type: 2
   alpha: 0.05
   annotation_file: diann/annotation.txt
   index_col: Protein.Ids
-  metadata_col: Genes
+  factor_col: Condition
+  log2: true
 </code></pre>
 <p>Load example data by clicking the <strong>Load Example</strong> button in the UI.</p>
 <h2 id="usage">Usage</h2>
